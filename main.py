@@ -20,8 +20,15 @@ class Subtitle():
     return self.__str__()
 
 def file_to_content(filename):
+  """
+    Opens and returns the contents of a file.
+
+    args: a String, the name of the file to read
+    returns: a String, the contents of the file read
+  """
   f = open(filename, 'r')
   content = f.read()
+  f.close()
   return content.replace('\r', '')
 
 def parse_to_subtitles(content):
@@ -45,6 +52,8 @@ def parse_to_subtitles(content):
 
 def can_merge_split_subtitles(first_sub, second_sub):
   """
+    Checks if the provided subtitles were in fact split incorrectly by the OCR.
+
     args: Subtitle, Subtitle
     returns: boolean (True if you can merge them. False if you can't)
   """
@@ -52,6 +61,8 @@ def can_merge_split_subtitles(first_sub, second_sub):
 
 def merge_split_subtitles(first_sub, second_sub):
   """
+    Extends first_sub to the end time of second_sub.
+
     args: Subtitle, Subtitle
     returns: Subtitle
   """
@@ -59,12 +70,18 @@ def merge_split_subtitles(first_sub, second_sub):
   return first_sub
 
 def prompt_for_merge(current_sub, merge_candidate_sub):
-  '''
+  """
+    Prompts user to confirm merging the two subtitles together.
+
+    args: Subtitle, Subtitle
+    returns: Boolean
+  """
+  """
   print "\nThese are the two candidates: ", current_sub, merge_candidate_sub
   print "\nThey would result in: ", merge_split_subtitles(current_sub, merge_candidate_sub)
   result = raw_input("\nDo you want to merge them? ")
   return result in ["y", "Y"]
-  '''
+  """
   return True
 
 def clean_subtitles(subtitles):
@@ -95,12 +112,25 @@ def clean_subtitles(subtitles):
   return subtitles
 
 def join_subs(sub_a, sub_b):
+  """
+    Joins two subtitles that occurred simultaneously and
+    adds their content on separate lines starting with a hyphen.
+
+    args: Subtitle, Subtitle
+    returns: Subtitle
+  """
   sub_a.content = sub_a.content.replace('\n', ' ')
   sub_b.content = sub_b.content.replace('\n', ' ')
   sub_a.content = "-%s\n-%s" % (sub_a.content, sub_b.content)
   return sub_a
 
 def prompt_for_join(sub_a, sub_b):
+  """
+    Prompts user to confirm joining the two subtitles together.
+
+    args: Subtitle, Subtitle
+    returns: Boolean
+  """
   print "\nThese are the two candidates: ", sub_a, sub_b
   print "\nThey would result in: ", join_subs(sub_a, sub_b)
   result = raw_input("\nDo you want to merge them? ")
