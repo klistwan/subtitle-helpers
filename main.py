@@ -38,17 +38,7 @@ def parse_to_subtitles(content):
     args: a String, represents the entire content of an SRT file
     returns: List of Subtitle objects
   """ 
-  segments = [s for s in content.split("\n\n") if s.strip()]
-  initial_subtitle = Subtitle(segments[0].strip())
-  subtitles = [initial_subtitle]
-  prev = initial_subtitle
-  for segment in segments[1:]:
-    subtitle = Subtitle(segment.strip())
-    prev.next = subtitle
-    subtitle.prev = prev
-    prev = subtitle
-    subtitles.append(subtitle)
-  return subtitles
+  return [Subtitle(s.strip()) for s in content.split("\n\n") if s.strip()]
 
 def can_merge_split_subtitles(first_sub, second_sub):
   """
@@ -149,8 +139,9 @@ def main(filename):
   new_filename = filename.replace(".srt", " (cleaned).srt")
   content = file_to_content(filename)
   subtitles = parse_to_subtitles(content)
+  original_count = len(subtitles)
   subtitles = clean_subtitles(subtitles)
-  print "original segment count: ", len(subtitles)
+  print "original segment count: ", original_count
   print "current segment count : ", len(subtitles)
   f = open(new_filename, 'w')
   f.write("\n\n".join(map(lambda s: s.__str__(), subtitles)))
@@ -158,7 +149,7 @@ def main(filename):
   print "Created new file: ", f.name
 
 if __name__ == "__main__":
-  main2(sys.argv[1])
+  main(sys.argv[1])
 
 
 
