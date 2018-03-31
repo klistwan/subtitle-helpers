@@ -69,21 +69,6 @@ def merge_split_subtitles(first_sub, second_sub):
   first_sub.end = second_sub.end
   return first_sub
 
-def prompt_for_merge(current_sub, merge_candidate_sub):
-  """
-    Prompts user to confirm merging the two subtitles together.
-
-    args: Subtitle, Subtitle
-    returns: Boolean
-  """
-  """
-  print "\nThese are the two candidates: ", current_sub, merge_candidate_sub
-  print "\nThey would result in: ", merge_split_subtitles(current_sub, merge_candidate_sub)
-  result = raw_input("\nDo you want to merge them? ")
-  return result in ["y", "Y"]
-  """
-  return True
-
 def clean_subtitles(subtitles):
   """
     Finds any subtitles that were split by the OCR,
@@ -104,11 +89,9 @@ def clean_subtitles(subtitles):
       current_idx += 1
       continue
     # If there are, merge them.
-    decision = prompt_for_merge(current_sub, potential_matches[0])
-    if decision:
-      current_sub = merge_split_subtitles(current_sub, potential_matches[0])
-      subtitles[current_idx] = current_sub
-      subtitles.remove(potential_matches[0])
+    current_sub = merge_split_subtitles(current_sub, potential_matches[0])
+    subtitles[current_idx] = current_sub
+    subtitles.remove(potential_matches[0])
   return subtitles
 
 def join_subs(sub_a, sub_b):
@@ -123,18 +106,6 @@ def join_subs(sub_a, sub_b):
   sub_b.content = sub_b.content.replace('\n', ' ')
   sub_a.content = "-%s\n-%s" % (sub_a.content, sub_b.content)
   return sub_a
-
-def prompt_for_join(sub_a, sub_b):
-  """
-    Prompts user to confirm joining the two subtitles together.
-
-    args: Subtitle, Subtitle
-    returns: Boolean
-  """
-  print "\nThese are the two candidates: ", sub_a, sub_b
-  print "\nThey would result in: ", join_subs(sub_a, sub_b)
-  result = raw_input("\nDo you want to merge them? ")
-  return result in ["y", "Y"]
 
 def combine_simultaneous_subtitles(subtitles):
   """
@@ -156,11 +127,9 @@ def combine_simultaneous_subtitles(subtitles):
       current_idx += 1
       continue
     # If there are, join them.
-    decision = prompt_for_join(current_sub, potential_matches[0])
-    if decision:
-      current_sub = join_subs(current_sub, potential_matches[0])
-      subtitles[current_idx] = current_sub
-      subtitles.remove(potential_matches[0])
+    current_sub = join_subs(current_sub, potential_matches[0])
+    subtitles[current_idx] = current_sub
+    subtitles.remove(potential_matches[0])
   return subtitles
 
 def main2(filename):
