@@ -7,6 +7,8 @@ python:
 
 install:
   - pip install codecov
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
+
 
 script:
   - coverage run tests/main_test.py
