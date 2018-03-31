@@ -72,7 +72,7 @@ def clean_subtitles(subtitles):
     potential_matches = filter(
       lambda s: (s.content == current_sub.content) and (s.start == current_sub.end), 
       up_ahead)
-    # If no merge candidates, move to next sub.
+    # If no merge candidates, move to next subtitle.
     if not potential_matches:
       current_idx += 1
       continue
@@ -82,7 +82,7 @@ def clean_subtitles(subtitles):
     subtitles.remove(potential_matches[0])
   return subtitles
 
-def join_subs(sub_a, sub_b):
+def join_simultaneous_subs(sub_a, sub_b):
   """
     Joins two subtitles that occurred simultaneously and
     adds their content on separate lines starting with a hyphen.
@@ -115,12 +115,12 @@ def combine_simultaneous_subtitles(subtitles):
       current_idx += 1
       continue
     # If there are, join them.
-    current_sub = join_subs(current_sub, potential_matches[0])
+    current_sub = join_simultaneous_subs(current_sub, potential_matches[0])
     subtitles[current_idx] = current_sub
     subtitles.remove(potential_matches[0])
   return subtitles
 
-def main2(filename):
+def merge_simultaneous_subtitles(filename):
   new_filename = filename.replace(".srt", " (reduced).srt")
   content = file_to_content(filename)
   subtitles = parse_to_subtitles(content)
@@ -133,7 +133,7 @@ def main2(filename):
   f.close()
   print "Created new file: ", f.name
 
-def main(filename):
+def merge_broken_subtitles(filename):
   new_filename = filename.replace(".srt", " (cleaned).srt")
   content = file_to_content(filename)
   subtitles = parse_to_subtitles(content)
@@ -145,9 +145,12 @@ def main(filename):
   f.write("\n\n".join(map(lambda s: s.__str__(), subtitles)))
   f.close()
   print "Created new file: ", f.name
+  merge = raw_input("Do you want to merge simultaneous subtitles too? ")
+  if merge in ["y", "yes"]:
+    merge_simultaneous_subtitles(f.name)
 
 if __name__ == "__main__":
-  main(sys.argv[1])
+  merge_broken_subtitles(sys.argv[1])
 
 
 
