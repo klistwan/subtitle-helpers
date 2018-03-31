@@ -10,8 +10,6 @@ class Subtitle():
     self.start = times.split()[0]
     self.end = times.split()[2]
     self.content = "\n".join(content)
-    self.prev = None
-    self.next = None
 
   def __str__(self):
     return "\n%s\n%s --> %s\n%s\n" % (self.idx, self.start, self.end, self.content)
