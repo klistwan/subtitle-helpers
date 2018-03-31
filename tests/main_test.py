@@ -49,6 +49,12 @@ class SubsTestCase(unittest.TestCase):
     subtitles = main.clean_subtitles(subtitles)
     self.assertEqual(len(subtitles), 2)
 
+  def test_join_simultaneous_subtitles(self):
+    first_sub = main.Subtitle("1\n00:05:14 --> 00:07:19\nwhat is love")
+    second_sub = main.Subtitle("2\n00:06:19 --> 00:07:19\ndon't hurt me")
+    joined_sub = main.join_simultaneous_subs(first_sub, second_sub)
+    self.assertEqual(joined_sub.content, "-what is love\n-don't hurt me")
+
   def test_join_subtitles(self):
     content = main.file_to_content('tests/fixtures/2.srt')
     subtitles = main.parse_to_subtitles(content)
