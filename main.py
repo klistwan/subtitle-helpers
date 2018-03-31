@@ -1,7 +1,7 @@
 import sys
 
 
-class Subtitle():
+class Subtitle(object):
     def __init__(self, segment):
         split_segment = segment.strip().split('\n')
         self.idx = split_segment[0]
@@ -18,6 +18,14 @@ class Subtitle():
     def __repr__(self):
         return self.__str__()
 
+    def extend(self, next_subtitle):
+        self.end = next_subtitle.end
+
+    def add_simultaneous_sub(self, next_sub):
+        self.content = self.content.replace('\n', ' ')
+        next_sub.content = next_sub.content.replace('\n', ' ')
+        self.content = "-%s\n-%s" % (self.content, next_sub.content)
+
 
 def file_to_content(filename):
     """
@@ -26,9 +34,9 @@ def file_to_content(filename):
         args: a String, the name of the file to read
         returns: a String, the contents of the file read
     """
-    f = open(filename, 'r')
-    content = f.read()
-    f.close()
+    _file = open(filename, 'r')
+    content = _file.read()
+    _file.close()
     return content.replace('\r', '')
 
 
@@ -53,20 +61,9 @@ def can_merge_split_subtitles(first_sub, second_sub):
            (first_sub.content == second_sub.content)
 
 
-def merge_split_subtitles(first_sub, second_sub):
+def merge_split_subtitles(subtitles):
     """
-        Extends first_sub to the end time of second_sub.
-
-        args: Subtitle, Subtitle
-        returns: Subtitle
-    """
-    first_sub.end = second_sub.end
-    return first_sub
-
-
-def clean_subtitles(subtitles):
-    """
-        Finds any subtitles that were split by the OCR,
+        Finds all subtitles that were split by the OCR,
         and merges them together into a single subtitle.
 
         args: List of Subtitles
@@ -76,33 +73,18 @@ def clean_subtitles(subtitles):
     while current_idx < len(subtitles):
         current_sub = subtitles[current_idx]
         up_ahead = subtitles[current_idx + 1: current_idx + 6]
-        potential_matches = filter(
-            lambda s: (s.content == current_sub.content) and
-                      (s.start == current_sub.end),
-            up_ahead)
+        potential_matches = \
+            [s for s in up_ahead if (s.content == current_sub.content) and
+             (s.start == current_sub.end)]
         # If no merge candidates, move to next subtitle.
         if not potential_matches:
             current_idx += 1
             continue
         # If there are, merge them.
-        current_sub = merge_split_subtitles(current_sub, potential_matches[0])
+        current_sub.extend(potential_matches[0])
         subtitles[current_idx] = current_sub
         subtitles.remove(potential_matches[0])
     return subtitles
-
-
-def join_simultaneous_subs(sub_a, sub_b):
-    """
-        Joins two subtitles that occurred simultaneously and
-        adds their content on separate lines starting with a hyphen.
-
-        args: Subtitle, Subtitle
-        returns: Subtitle
-    """
-    sub_a.content = sub_a.content.replace('\n', ' ')
-    sub_b.content = sub_b.content.replace('\n', ' ')
-    sub_a.content = "-%s\n-%s" % (sub_a.content, sub_b.content)
-    return sub_a
 
 
 def combine_simultaneous_subtitles(subtitles):
@@ -117,16 +99,15 @@ def combine_simultaneous_subtitles(subtitles):
     while current_idx < len(subtitles):
         current_sub = subtitles[current_idx]
         up_ahead = subtitles[current_idx + 1: current_idx + 6]
-        potential_matches = filter(
-            lambda s: (s.start == current_sub.start) or
-                      (s.end == current_sub.end),
-            up_ahead)
+        potential_matches = [s for s in up_ahead if
+                             (s.start == current_sub.start) or
+                             (s.end == current_sub.end)]
         # If no merge candidates, move to next sub.
         if not potential_matches:
             current_idx += 1
             continue
         # If there are, join them.
-        current_sub = join_simultaneous_subs(current_sub, potential_matches[0])
+        current_sub.add_simultaneous_sub(potential_matches[0])
         subtitles[current_idx] = current_sub
         subtitles.remove(potential_matches[0])
     return subtitles
@@ -140,10 +121,10 @@ def merge_simultaneous_subtitles(filename):
     subtitles = combine_simultaneous_subtitles(subtitles)
     print "original segment count: ", original_count
     print "current segment count : ", len(subtitles)
-    f = open(new_filename, 'w')
-    f.write("\n\n".join(map(lambda s: s.__str__(), subtitles)))
-    f.close()
-    print "Created new file: ", f.name
+    _file = open(new_filename, 'w')
+    _file.write("\n\n".join([s.__str__() for s in subtitles]))
+    _file.close()
+    print "Created new file: ", _file.name
 
 
 def merge_broken_subtitles(filename):
@@ -151,16 +132,16 @@ def merge_broken_subtitles(filename):
     content = file_to_content(filename)
     subtitles = parse_to_subtitles(content)
     original_count = len(subtitles)
-    subtitles = clean_subtitles(subtitles)
+    subtitles = merge_split_subtitles(subtitles)
     print "original segment count: ", original_count
     print "current segment count : ", len(subtitles)
-    f = open(new_filename, 'w')
-    f.write("\n\n".join(map(lambda s: s.__str__(), subtitles)))
-    f.close()
-    print "Created new file: ", f.name
+    _file = open(new_filename, 'w')
+    _file.write("\n\n".join([s.__str__() for s in subtitles]))
+    _file.close()
+    print "Created new file: ", _file.name
     merge = raw_input("Do you want to merge simultaneous subtitles too? ")
     if merge in ["y", "yes"]:
-        merge_simultaneous_subtitles(f.name)
+        merge_simultaneous_subtitles(_file.name)
 
 
 if __name__ == "__main__":

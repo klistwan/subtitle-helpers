@@ -31,32 +31,32 @@ class SubsTestCase(unittest.TestCase):
         first_sub.end = "00:05:99"
         self.assertFalse(main.can_merge_split_subtitles(first_sub, second_sub))
 
-    def test_merge_split_subtitles(self):
+    def test_extend(self):
         first_sub = main.Subtitle("1\n00:05:14 --> 00:06:19\na\nb")
         second_sub = main.Subtitle("2\n00:06:19 --> 00:08:93\na\nb")
-        subtitle = main.merge_split_subtitles(first_sub, second_sub)
-        self.assertEqual(subtitle.start, "00:05:14")
-        self.assertEqual(subtitle.end, "00:08:93")
-        self.assertEqual(subtitle.content, "a\nb")
+        first_sub.extend(second_sub)
+        self.assertEqual(first_sub.start, "00:05:14")
+        self.assertEqual(first_sub.end, "00:08:93")
+        self.assertEqual(first_sub.content, "a\nb")
 
-    def test_clean_subtitles(self):
+    def test_merge_split_subtitles(self):
         content = main.file_to_content('tests/fixtures/1.srt')
         subtitles = main.parse_to_subtitles(content)
         self.assertEqual(len(subtitles), 6)
-        subtitles = main.clean_subtitles(subtitles)
+        subtitles = main.merge_split_subtitles(subtitles)
         self.assertEqual(len(subtitles), 4)
 
         content = main.file_to_content('tests/fixtures/3.srt')
         subtitles = main.parse_to_subtitles(content)
         self.assertEqual(len(subtitles), 3)
-        subtitles = main.clean_subtitles(subtitles)
+        subtitles = main.merge_split_subtitles(subtitles)
         self.assertEqual(len(subtitles), 2)
 
-    def test_join_simultaneous_subtitles(self):
+    def test_add_simultaneous_subtitles(self):
         first_sub = main.Subtitle("1\n00:05:14 --> 00:07:19\nwhat is love")
         second_sub = main.Subtitle("2\n00:06:19 --> 00:07:19\ndon't hurt me")
-        joined_sub = main.join_simultaneous_subs(first_sub, second_sub)
-        self.assertEqual(joined_sub.content, "-what is love\n-don't hurt me")
+        first_sub.add_simultaneous_sub(second_sub)
+        self.assertEqual(first_sub.content, "-what is love\n-don't hurt me")
 
     def test_join_subtitles(self):
         content = main.file_to_content('tests/fixtures/2.srt')
