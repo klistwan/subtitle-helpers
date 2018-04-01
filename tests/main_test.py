@@ -1,4 +1,6 @@
+import datetime
 import unittest
+
 import main
 
 
@@ -9,6 +11,11 @@ class SubsTestCase(unittest.TestCase):
         self.assertEqual(subtitle.start, "00:05:14")
         self.assertEqual(subtitle.end, "00:06:19")
         self.assertEqual(subtitle.content, "a\nb")
+
+    def test_subtitle_length(self):
+        content = "1\n00:05:14,192 --> 00:05:19,934\na\nb"
+        subtitle = main.Subtitle(content)
+        self.assertEqual(subtitle.length(), datetime.timedelta(0, 5, 742000))
 
     def test_parse_to_subtitles(self):
         content = "1\n00:05:14 --> 00:06:19\na\nb\n\n"

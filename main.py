@@ -1,7 +1,18 @@
+"""Subtitle helper scripts.
+
+This module contains two scripts to help clean broken Subtitles.
+"""
+
+import datetime
 import sys
 
 
 class Subtitle(object):
+    """
+        Subtitle(segment)
+
+        A Subtitle object that contains content, with a start and end time.
+    """
     def __init__(self, segment):
         split_segment = segment.strip().split('\n')
         self.idx = split_segment[0]
@@ -19,12 +30,36 @@ class Subtitle(object):
         return self.__str__()
 
     def extend(self, next_subtitle):
+        """
+            Changes current subtitle's end time to next_subtitle's.
+
+            arg: Subtitle (self), Subtitle
+            returns: None
+        """
         self.end = next_subtitle.end
 
     def add_simultaneous_sub(self, next_sub):
+        """
+            Joins together two subtitles' contents on separate lines,
+            starting with a hyphen.
+
+            arg: Subtitle (self), Subtitle)
+            returns: None
+        """
         self.content = self.content.replace('\n', ' ')
         next_sub.content = next_sub.content.replace('\n', ' ')
         self.content = "-%s\n-%s" % (self.content, next_sub.content)
+
+    def length(self):
+        """
+            Returns the length of the subtitle.
+
+            args: Subtitle (self)
+            returns datetime.timedelta
+        """
+        time_format = "%H:%M:%S,%f"
+        return datetime.datetime.strptime(self.end, time_format) - \
+            datetime.datetime.strptime(self.start, time_format)
 
 
 def file_to_content(filename):
@@ -114,6 +149,15 @@ def combine_simultaneous_subtitles(subtitles):
 
 
 def merge_simultaneous_subtitles(filename):
+    """
+        Goes through a file, indicated by the filename, and merges
+        all subtitles that start or end at the same time. It writes
+        these new subtitles to a new file, which takes the existing
+        file's name and adds (reduced) to the end of it.
+
+        args: String, represents the file's name
+        returns: None
+    """
     new_filename = filename.replace(".srt", " (reduced).srt")
     content = file_to_content(filename)
     subtitles = parse_to_subtitles(content)
@@ -128,6 +172,14 @@ def merge_simultaneous_subtitles(filename):
 
 
 def merge_broken_subtitles(filename):
+    """
+        Goes through a file and merges subtitles incorrectly
+        split by Google's OCR. It writes these to a new file,
+        the name of which is the old file's name and (cleaned).
+
+        args: String, the name of the file
+        returns: None
+    """
     new_filename = filename.replace(".srt", " (cleaned).srt")
     content = file_to_content(filename)
     subtitles = parse_to_subtitles(content)
