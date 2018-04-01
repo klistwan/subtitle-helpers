@@ -148,6 +148,23 @@ def combine_simultaneous_subtitles(subtitles):
     return subtitles
 
 
+def flag_short_subtitles(subtitles):
+    """
+        Prints any subtitles that are too short.
+
+        args: List, contains Subtitle objects
+        returns: None
+    """
+    for subtitle in subtitles:
+        length = subtitle.length().total_seconds()
+        subtitle = " ".join([subtitle.idx, subtitle.start,
+                             subtitle.end, subtitle.content])
+        if length < 0.9:
+            print "Alert: %.3f/1.000 - %s" % (length, subtitle)
+        elif length < 1.5:
+            print "Warning: %.3f/1.500 - %s" % (length, subtitle)
+
+
 def merge_simultaneous_subtitles(filename):
     """
         Goes through a file, indicated by the filename, and merges
@@ -163,6 +180,7 @@ def merge_simultaneous_subtitles(filename):
     subtitles = parse_to_subtitles(content)
     original_count = len(subtitles)
     subtitles = combine_simultaneous_subtitles(subtitles)
+    flag_short_subtitles(subtitles)
     print "original segment count: ", original_count
     print "current segment count : ", len(subtitles)
     _file = open(new_filename, 'w')
