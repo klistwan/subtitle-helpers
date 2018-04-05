@@ -62,26 +62,17 @@ class Subtitle(object):
             datetime.datetime.strptime(self.start, time_format)
 
 
-def file_to_content(filename):
+def create_subtitles_from_file(filename):
     """
-        Opens and returns the contents of a file.
+        Opens an SRT file and creates Subtitles from it.
 
         args: a String, the name of the file to read
-        returns: a String, the contents of the file read
+        returns: List of Subtitle objects
     """
     _file = open(filename, 'r')
     content = _file.read()
     _file.close()
-    return content.replace('\r', '')
-
-
-def parse_to_subtitles(content):
-    """
-        Parses through a string and creates Subtitle objects.
-
-        args: a String, represents the entire content of an SRT file
-        returns: List of Subtitle objects
-    """
+    content = content.replace('\r', '')
     return [Subtitle(s.strip()) for s in content.split("\n\n") if s.strip()]
 
 
@@ -176,8 +167,7 @@ def merge_simultaneous_subtitles(filename):
         returns: None
     """
     new_filename = filename.replace(".srt", " (reduced).srt")
-    content = file_to_content(filename)
-    subtitles = parse_to_subtitles(content)
+    subtitles = create_subtitles_from_file(filename)
     original_count = len(subtitles)
     subtitles = combine_simultaneous_subtitles(subtitles)
     flag_short_subtitles(subtitles)
@@ -199,8 +189,7 @@ def merge_broken_subtitles(filename):
         returns: None
     """
     new_filename = filename.replace(".srt", " (cleaned).srt")
-    content = file_to_content(filename)
-    subtitles = parse_to_subtitles(content)
+    subtitles = create_subtitles_from_file(filename)
     original_count = len(subtitles)
     subtitles = merge_split_subtitles(subtitles)
     print "original segment count: ", original_count

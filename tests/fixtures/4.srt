@@ -17,6 +17,3 @@
 00:07:45,400 --> 00:07:46,733
 (ミドリ)
 うんそうだね!
-
-# Identify any large subtitles containing 2+ small subtitles.
-# Merge 1 small subtitle into larger parent.

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import datetime
 import unittest
 
@@ -17,12 +20,12 @@ class SubsTestCase(unittest.TestCase):
         subtitle = main.Subtitle(content)
         self.assertEqual(subtitle.length(), datetime.timedelta(0, 5, 742000))
 
-    def test_parse_to_subtitles(self):
-        content = "1\n00:05:14 --> 00:06:19\na\nb\n\n"
-        content += "2\n00:08:19 --> 00:09:25\nc\nd"
-        subtitles = main.parse_to_subtitles(content)
-        self.assertEqual(subtitles[0].start, "00:05:14")
-        self.assertEqual(subtitles[1].start, "00:08:19")
+    def test_create_subtitles_from_file(self):
+        subtitles = main.create_subtitles_from_file('tests/fixtures/3.srt')
+        self.assertEqual(subtitles[0].content, "どうして?")
+        self.assertEqual(subtitles[1].content, "どうして?")
+        self.assertEqual(subtitles[2].content,
+                         "(哲也)入ってきたばっかのとき\n結構カッコつけてたからね")
 
     def test_can_merge_split_subtitles(self):
         first_sub = main.Subtitle("1\n00:05:14 --> 00:06:19\na\nb")
@@ -47,14 +50,12 @@ class SubsTestCase(unittest.TestCase):
         self.assertEqual(first_sub.content, "a\nb")
 
     def test_merge_split_subtitles(self):
-        content = main.file_to_content('tests/fixtures/1.srt')
-        subtitles = main.parse_to_subtitles(content)
+        subtitles = main.create_subtitles_from_file('tests/fixtures/1.srt')
         self.assertEqual(len(subtitles), 6)
         subtitles = main.merge_split_subtitles(subtitles)
         self.assertEqual(len(subtitles), 4)
 
-        content = main.file_to_content('tests/fixtures/3.srt')
-        subtitles = main.parse_to_subtitles(content)
+        subtitles = main.create_subtitles_from_file('tests/fixtures/3.srt')
         self.assertEqual(len(subtitles), 3)
         subtitles = main.merge_split_subtitles(subtitles)
         self.assertEqual(len(subtitles), 2)
@@ -66,8 +67,7 @@ class SubsTestCase(unittest.TestCase):
         self.assertEqual(first_sub.content, "-what is love\n-don't hurt me")
 
     def test_join_subtitles(self):
-        content = main.file_to_content('tests/fixtures/2.srt')
-        subtitles = main.parse_to_subtitles(content)
+        subtitles = main.create_subtitles_from_file('tests/fixtures/2.srt')
         self.assertEqual(len(subtitles), 5)
         subtitles = main.combine_simultaneous_subtitles(subtitles)
         self.assertEqual(len(subtitles), 3)
